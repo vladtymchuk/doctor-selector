@@ -220,6 +220,10 @@ export const Form: React.FC = () => {
   }
   const handleCity = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
     setSelectedCity(event.target.value as string)
+    if (selectedDoctorInfo) {
+      setSelectedDoctorInfo({} as IDoctor)
+      setSelectedDoctor('')
+    }
   } 
 
   const filterByCity = (cityValue: string, doctors: IDoctor[]) => {
@@ -403,7 +407,7 @@ export const Form: React.FC = () => {
             required
           >
             {/* <MenuItem value="">Select doctor</MenuItem> */}
-            {filteredDoctors.length <=1 && <MenuItem value="">No doctors</MenuItem>}
+            {filteredDoctors.length < 1 && <MenuItem value="">No doctors</MenuItem>}
             {filteredDoctors.map((doctor) => (
               <MenuItem key={doctor.id} value={`${doctor.name} ${doctor.surname}`}>
                 {doctor.name} {doctor.surname}
