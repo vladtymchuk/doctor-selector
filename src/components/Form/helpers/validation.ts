@@ -1,5 +1,3 @@
-// helpers.ts
-
 export const validateName = (name: string): string | null => {
     if (!name) {
       return 'Please enter your name.';
