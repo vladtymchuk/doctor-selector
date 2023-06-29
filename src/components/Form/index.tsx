@@ -206,34 +206,6 @@ export const Form: React.FC = () => {
     setBirthday(formattedValue)
 
   }
-  
-
-  const handleDateOfBD = (event: React.ChangeEvent<{ value: string }>) => {
-   
-    if (selectedDoctorInfo){
-      const selectedDoctorSpeciality = ISpecialityOptions.find(spec => spec.id === selectedDoctorInfo.specialityId)
-      console.log(JSON.stringify(selectedDoctorSpeciality))
-      if (
-        (selectedDoctorSpeciality?.params?.maxAge && (getAge(event.target.value) < selectedDoctorSpeciality.params.maxAge)) ||
-        (selectedDoctorSpeciality?.params?.minAge && (getAge(event.target.value) > selectedDoctorSpeciality.params.minAge))
-      ) {
-        setBirthday(event.target.value)
-        setFormError('')
-      } else if (selectedDoctorSpeciality?.params?.maxAge) {
-          setFormError(`The Doctor's Speciality has max age ${selectedDoctorSpeciality.params.maxAge}`)
-          setBirthday('')
-      } else if (selectedDoctorSpeciality?.params?.minAge) {
-          setFormError(`The Doctor's Speciality has min age ${selectedDoctorSpeciality.params.minAge}`)
-          setBirthday('')
-        } else {
-          setBirthday(event.target.value)
-          setFormError('')
-        }
-    } else {
-      setBirthday(event.target.value)
-      setFormError('')
-    }
-  }
 
   const filterByDB = (bdValue: string, doctors: IDoctor[]) => {
     const age = getAge(bdValue)
@@ -259,7 +231,8 @@ export const Form: React.FC = () => {
   const handleDoctorSpec = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
     setSelectedISpeciality(event.target.value as string)
     const speciality = ISpecialityOptions.find(spec => spec.name === event.target.value)
-    if (selectedDoctorInfo && speciality && selectedDoctorInfo.specialityId !== speciality?.id) {
+    if (selectedDoctorInfo.toString() === '{}' && speciality && selectedDoctorInfo.specialityId !== speciality?.id) {
+      console.log(selectedDoctorInfo)
       setSelectedDoctorInfo({} as IDoctor)
       setSelectedDoctor('')
       setSelectedCity('')
