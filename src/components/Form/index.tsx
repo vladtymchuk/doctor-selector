@@ -252,14 +252,20 @@ export const Form: React.FC = () => {
     if (selectedCity) doctors = filterByCity(selectedCity, doctors) 
     if (selectedISpeciality) doctors = filterBySpec(selectedISpeciality, doctors)
     setFilteredDoctors(doctors)
+    if (doctors.length < 1) setSelectedISpeciality('')
   }
 
   const handleDoctor = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
     const doctor = filteredDoctors.find(doc => (`${doc.name} ${doc.surname}`) === event.target.value)
+    // console.log("doc",doctor)
     if (doctor){
       setSelectedDoctor(`${doctor?.name} ${doctor?.surname}`)
       setDoctorInfo(doctor)
+    } else {
+      setSelectedISpeciality('')
+      console.log("no doctors");
     }
+
   }
 
   const setDoctorInfo = (doctor: IDoctor) => {
@@ -333,12 +339,12 @@ export const Form: React.FC = () => {
             required
             // startIcon={<Wc />}
           >
-             <MenuItem value="">
+             {/* <MenuItem value="">
               <Icon>
                 <Wc />
               </Icon>
               Select sex
-            </MenuItem>
+            </MenuItem> */}
             <MenuItem value="Male">
               <Icon>
                 <Wc />
@@ -362,7 +368,7 @@ export const Form: React.FC = () => {
             onChange={handleCity}
             required
           >
-            <MenuItem value="">Select city</MenuItem>
+            {/* <MenuItem value="">Select city</MenuItem> */}
             {cityOptions.map((city) => (
               <MenuItem key={city.id} value={city.name}>
                 {city.name}
@@ -378,7 +384,7 @@ export const Form: React.FC = () => {
             value={selectedISpeciality}
             onChange={handleDoctorSpec}
           >
-            <MenuItem value="">Select doctor speciality</MenuItem>
+            {/* <MenuItem value="">Select doctor speciality</MenuItem> */}
             {ISpecialityOptions.map((speciality) => (
               <MenuItem key={speciality.id} value={speciality.name}>
                 {speciality.name}
@@ -396,12 +402,14 @@ export const Form: React.FC = () => {
             onOpen={doFilterDoctors}
             required
           >
-            <MenuItem value="">Select doctor</MenuItem>
+            {/* <MenuItem value="">Select doctor</MenuItem> */}
+            {filteredDoctors.length <=1 && <MenuItem value="">No doctors</MenuItem>}
             {filteredDoctors.map((doctor) => (
               <MenuItem key={doctor.id} value={`${doctor.name} ${doctor.surname}`}>
                 {doctor.name} {doctor.surname}
               </MenuItem>
             ))}
+            
           </Select>
         </FormControl>
         <TextField
