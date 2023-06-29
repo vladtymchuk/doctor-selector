@@ -23,9 +23,8 @@ import { ICity } from '../../models/ICity';
 import { ISpeciality } from '../../models/ISpeciality';
 import { validateBirthday, validateEmail, validateMobileNumber, validateName } from './helpers/validation';
 import { IDoctor } from '../../models/IDoctor';
-import { getAge } from './helpers/date';
 import { ToastContainer, toast } from 'react-toastify';
-
+import { filterByCity, filterByDB, filterBySexParam, filterBySpec, formatDateString } from './helpers/utils';
 
 const useStyles = makeStyles((theme) => ({
   form: {
@@ -132,44 +131,32 @@ export const Form: React.FC = () => {
       setFormError(birthdayError);
       return;
     }
-  
+
     if (!sex) {
       setFormError('Please select your sex.');
       return;
     }
-  
+
     if (!selectedCity) {
       setFormError('Please select a city.');
       return;
     }
-  
+
     if (!email && !mobileNumber) {
       setFormError('Please enter either an email or a mobile number.');
       return;
     }
-  
+
     if (emailError) {
       setFormError(emailError);
       return;
     }
-  
+
     if (mobileNumberError) {
       setFormError(mobileNumberError);
       return;
     }
-
-    // If the form is valid, perform further actions (e.g., submit to backend)
-    setFormError('');
-    console.log('Form submitted:', {
-      name,
-      birthday,
-      sex,
-      selectedCity,
-      selectedISpeciality,
-      selectedDoctor,
-      email,
-      mobileNumber,
-    });
+    setFormError('')
     submitNotify()
     clearForm()
   };
@@ -179,45 +166,12 @@ export const Form: React.FC = () => {
     setSex(value);
   };
 
-  const filterBySexParam = (sexValue: string, doctors: IDoctor[]) => {
-      //find spec with nessesary gender or binary
-      const filteredSpecialist = ISpecialityOptions.filter(spec => (!spec.params?.gender || spec.params.gender === sexValue));
-      // filter doctors by "filteredSpecialist"
-      const res = doctors.filter(doctor => filteredSpecialist.find(spec => spec.id === doctor.specialityId))
-      return res
-  }
-
-  const formatDateString = (value: string): string => {
-    let formattedValue = value.replace(/\D/g, ''); // Remove non-numeric characters
-
-    if (formattedValue.length > 2) {
-      formattedValue = `${formattedValue.slice(0, 2)}/${formattedValue.slice(2)}`;
-    }
-
-    if (formattedValue.length > 5) {
-      formattedValue = `${formattedValue.slice(0, 5)}/${formattedValue.slice(5, 9)}`;
-    }
-
-    return formattedValue;
-  }
-
   const handleDateInputChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const formattedValue: string = formatDateString(event.target.value);
     setBirthday(formattedValue)
 
   }
 
-  const filterByDB = (bdValue: string, doctors: IDoctor[]) => {
-    const age = getAge(bdValue)
-    const res = doctors.filter(doctor => {
-      const maxAge = ISpecialityOptions.find(spec => spec.id === doctor.specialityId)?.params?.maxAge
-      const minAge = ISpecialityOptions.find(spec => spec.id === doctor.specialityId)?.params?.minAge
-      if (maxAge && age > maxAge) return false;
-      if (minAge && age < minAge) return false;
-      return true;
-    }).filter(selectDoctor => selectDoctor.isPediatrician === (getAge(bdValue) < 18))
-    return res
-  }
   const handleCity = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
     setSelectedCity(event.target.value as string)
     if (selectedDoctorInfo) {
@@ -225,12 +179,6 @@ export const Form: React.FC = () => {
       setSelectedDoctor('')
     }
   } 
-
-  const filterByCity = (cityValue: string, doctors: IDoctor[]) => {
-    const cityObj =  cityOptions.find(city => city.name === cityValue)
-    const res = doctors.filter(doctor => doctor.cityId === cityObj?.id)
-    return res
-  }
 
   const handleDoctorSpec = (event: React.ChangeEvent<{ name?: string; value: unknown }>) => {
     setSelectedISpeciality(event.target.value as string)
@@ -243,18 +191,12 @@ export const Form: React.FC = () => {
     }
   }
 
-  const filterBySpec = (specValue: string, doctors: IDoctor[]): IDoctor[] => {
-    const specObj = ISpecialityOptions.find(spec => spec.name === specValue)
-    const res = doctors.filter(doctor => doctor.specialityId === specObj?.id)
-    return res
-  }
-
   const doFilterDoctors = () => {
     let doctors: IDoctor[] = doctorOptions
-    if (birthday) doctors = filterByDB(birthday, doctors)
-    if (sex) doctors = filterBySexParam(sex, doctors)
-    if (selectedCity) doctors = filterByCity(selectedCity, doctors) 
-    if (selectedISpeciality) doctors = filterBySpec(selectedISpeciality, doctors)
+    if (birthday) doctors = filterByDB(birthday, doctors, ISpecialityOptions)
+    if (sex) doctors = filterBySexParam(sex, doctors, ISpecialityOptions)
+    if (selectedCity) doctors = filterByCity(selectedCity, doctors, cityOptions) 
+    if (selectedISpeciality) doctors = filterBySpec(selectedISpeciality, doctors, ISpecialityOptions)
     setFilteredDoctors(doctors)
     if (doctors.length < 1) setSelectedISpeciality('')
   }
@@ -406,7 +348,6 @@ export const Form: React.FC = () => {
             onOpen={doFilterDoctors}
             required
           >
-            {/* <MenuItem value="">Select doctor</MenuItem> */}
             {filteredDoctors.length < 1 && <MenuItem value="">No doctors</MenuItem>}
             {filteredDoctors.map((doctor) => (
               <MenuItem key={doctor.id} value={`${doctor.name} ${doctor.surname}`}>
