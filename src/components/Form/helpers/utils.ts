@@ -1,3 +1,4 @@
+import { log } from "console";
 import { ICity } from "../../../models/ICity";
 import { IDoctor } from "../../../models/IDoctor";
 import { ISpeciality } from "../../../models/ISpeciality";
@@ -5,9 +6,15 @@ import { getAge } from "./date";
 
 export const filterBySexParam = (sexValue: string, doctors: IDoctor[], ISpecialityOptions: ISpeciality[]) => {
     //find spec with nessesary gender or binary
-    const filteredSpecialist = ISpecialityOptions.filter(spec => (!spec.params?.gender || spec.params.gender === sexValue));
+    const filteredSpecialist = ISpecialityOptions.filter(spec => {
+      if (!spec.params?.gender) return true 
+      if (spec.params.gender && spec.params.gender === sexValue) return true
+      return false
+    });
+    console.log("JJJ", JSON.stringify(filteredSpecialist, null, 3));
+    
     // filter doctors by "filteredSpecialist"
-    const res = doctors.filter(doctor => filteredSpecialist.find(spec => spec.id === doctor.specialityId))
+    const res = doctors.filter(doctor => Boolean(filteredSpecialist.find(spec => spec.id === doctor.specialityId)))
     return res
 }
 
